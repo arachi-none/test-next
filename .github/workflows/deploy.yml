@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,23 +19,45 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Deploy to server via SSH
-        uses: appleboy/scp-action@v1
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: ".next/,node_modules/,package.json,next.config.mjs,next-env.d.ts"
-          target: "/home/adminit/webs/cms-prod/"
-          rm: true
+          name: next-build
+          path: .next/
+          retention-days: 7
+
+      - name: Upload node_modules
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-modules
+          path: node_modules/
+          retention-days: 7
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .next/
+
+      - name: Download node_modules
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+          path: node_modules/
+
+      - name: Deploy to production folder
+        run: |
+          mkdir -p /home/adminit/webs/cms-prod
+          cp -r .next/ node_modules/ package.json next.config.mjs next-env.d.ts /home/adminit/webs/cms-prod/
 
       - name: Restart PM2
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /home/adminit/webs/cms-prod
-            pm2 restart blog-cms || pm2 start npm --name "blog-cms" -- run start
-            pm2 save
+        run: |
+          cd /home/adminit/webs/cms-prod
+          pm2 restart blog-cms || pm2 start npm --name "blog-cms" -- run start
+          pm2 save
