@@ -22,7 +22,12 @@ jobs:
       - name: Cache build output
         uses: actions/cache/save@v4
         with:
-          path: .next/
+          path: |
+            .next/
+            node_modules/
+            next-env.d.ts
+            package.json
+            next.config.mjs
           key: next-build-${{ github.run_id }}-${{ github.run_attempt }}
 
   deploy:
@@ -34,7 +39,12 @@ jobs:
       - name: Restore build output
         uses: actions/cache/restore@v4
         with:
-          path: .next/
+          path: |
+            .next/
+            node_modules/
+            next-env.d.ts
+            package.json
+            next.config.mjs
           key: next-build-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Deploy to production folder
