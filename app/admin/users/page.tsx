@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "../../lib/auth-context";
-import { supabase } from "../../lib/supabase-client";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
+import { useAuth } from "../../../lib/auth-context";
+import { supabase } from "../../../lib/supabase-client";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import { Search, MoreHorizontal, Shield, UserX, UserCheck } from "lucide-react";
 
 interface UserProfile {
