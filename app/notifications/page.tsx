@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../lib/auth-context";
 import { supabase } from "../../lib/supabase-client";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import { Bell, Check, Trash2, MessageCircle, Star, UserPlus, Heart, BookOpen } from "lucide-react";
 
 interface Notification {
@@ -107,7 +106,7 @@ export default function NotificationsPage() {
           <div className="mt-6 rounded-lg border border-dashed p-12 text-center">
             <Bell className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">No notifications</h3>
-            <p className="mt-2 text-muted-foreground">You're all caught up!</p>
+            <p className="mt-2 text-muted-foreground">You&apos;re all caught up!</p>
           </div>
         ) : (
           <div className="mt-6 space-y-2">
@@ -115,7 +114,7 @@ export default function NotificationsPage() {
               <div
                 key={notification.id}
                 className={`flex items-start gap-4 rounded-lg border p-4 transition-colors ${
-                  notification.is_read ? "bg-background" "bg-muted/50"
+                  notification.is_read ? "bg-background" : "bg-muted/50"
                 }`}
               >
                 <div className="rounded-full bg-muted p-2">
