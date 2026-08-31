@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "../lib/auth-context";
-import { supabase } from "../lib/supabase-client";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { BookOpen, Plus, Edit, Trash2, Eye, Star, TrendingUp } from "lucide-react";
+import { useAuth } from "../../lib/auth-context";
+import { supabase } from "../../lib/supabase-client";
+import { Button } from "../../components/ui/button";
+import { BookOpen, Plus, Edit, Eye, Star, TrendingUp } from "lucide-react";
 
 interface Novel {
   id: string;

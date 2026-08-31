@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase-client";
-import { Input } from "../../components/ui/input";
 import { Search, Star, Eye, BookOpen } from "lucide-react";
 
 interface Novel {
