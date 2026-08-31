@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "../../lib/supabase-client";
-import { Button } from "../../components/ui/button";
+import { supabase } from "../../../lib/supabase-client";
+import { Button } from "../../../components/ui/button";
 import { ArrowLeft, Star, Eye, BookOpen, Heart, Share2, MessageCircle } from "lucide-react";
 
 interface Novel {
