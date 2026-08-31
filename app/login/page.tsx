@@ -1,24 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "../../lib/auth-context";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import Link from "next/link";
+import { supabase } from "../lib/supabase-client";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { signIn } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [debug, setDebug] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const { error } = await signIn(email, password);
-    if (error) setError(error.message);
+    setDebug("Starting login...");
+    
+    try {
+      setDebug("Calling supabase.auth.signInWithPassword...");
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        setDebug(`Error: ${error.message}`);
+        setError(error.message);
+      } else {
+        setDebug(`Success! User: ${data.user?.email}`);
+        // Wait a bit for session to be set
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      setDebug(`Exception: ${err.message}`);
+      setError(err.message || "An error occurred");
+    }
     setLoading(false);
   };
 
@@ -64,14 +85,19 @@ export default function LoginPage() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Signing in..." : "Sign in"}
           </Button>
+
+          {debug && (
+            <div className="rounded-md bg-muted p-3 text-xs font-mono">
+              Debug: {debug}
+            </div>
+          )}
         </form>
 
-        <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-primary hover:underline">
-            Sign up
-          </Link>
-        </p>
+        <div className="text-center text-xs text-muted-foreground">
+          <p>Test accounts:</p>
+          <p>admin@novel.space / Admin12345</p>
+          <p>writer@novel.space / Writer12345</p>
+        </div>
       </div>
     </div>
   );
