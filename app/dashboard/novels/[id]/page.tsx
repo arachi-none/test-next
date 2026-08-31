@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "../../lib/auth-context";
-import { supabase } from "../../lib/supabase-client";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
+import { useAuth } from "../../../lib/auth-context";
+import { supabase } from "../../../lib/supabase-client";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import { ArrowLeft, Save, Plus, Edit, Trash2 } from "lucide-react";
 
 interface Novel {
