@@ -1,27 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "../../../../lib/auth-context";
-import { supabase } from "../../../../lib/supabase-client";
-import { Button } from "../../../../components/ui/button";
-import { Input } from "../../../../components/ui/input";
-import { ArrowLeft, Save, Send } from "lucide-react";
+import { supabase } from "../../../lib/supabase";
 
 export default function NewNovelPage() {
-  const { user } = useAuth();
   const router = useRouter();
+  const [user, setUser] = useState<any>(null);
   const [title, setTitle] = useState("");
   const [synopsis, setSynopsis] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+      setUser(session.user);
+    };
+    checkAuth();
+  }, []);
+
   const generateSlug = (text: string) => {
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   };
 
   const handleSubmit = async (status: "draft" | "published") => {
@@ -36,7 +41,7 @@ export default function NewNovelPage() {
     const { data, error: dbError } = await supabase
       .from("novels")
       .insert({
-        author_id: user!.id,
+        author_id: user.id,
         title: title.trim(),
         slug,
         synopsis: synopsis.trim(),
@@ -59,19 +64,14 @@ export default function NewNovelPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container-wide flex h-16 items-center justify-between">
-          <Link href="/dashboard" className="text-xl font-bold tracking-tight">
-            NovelSpace
-          </Link>
+          <Link href="/" className="text-xl font-bold tracking-tight">NovelSpace</Link>
         </div>
       </header>
 
       <main className="container-narrow py-8">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-        </Link>
+        <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">← Back to Dashboard</Link>
 
         <h1 className="mt-6 text-3xl font-bold tracking-tight">Create New Novel</h1>
-        <p className="mt-2 text-muted-foreground">Set up your novel with a title and synopsis</p>
 
         <div className="mt-8 space-y-6">
           {error && (
@@ -79,35 +79,43 @@ export default function NewNovelPage() {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="title" className="text-sm font-medium">Title</label>
-            <Input
-              id="title"
+            <label className="text-sm font-medium">Title</label>
+            <input
+              type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter your novel's title"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="synopsis" className="text-sm font-medium">Synopsis</label>
+            <label className="text-sm font-medium">Synopsis</label>
             <textarea
-              id="synopsis"
               value={synopsis}
               onChange={(e) => setSynopsis(e.target.value)}
               placeholder="Write a compelling synopsis..."
               rows={6}
-              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             />
           </div>
 
           <div className="flex items-center gap-4">
-            <Button onClick={() => handleSubmit("draft")} variant="outline" disabled={loading}>
-              <Save className="h-4 w-4" /> Save Draft
-            </Button>
-            <Button onClick={() => handleSubmit("published")} disabled={loading}>
-              <Send className="h-4 w-4" /> Publish
-            </Button>
+            <button
+              onClick={() => handleSubmit("draft")}
+              disabled={loading}
+              className="btn-secondary"
+            >
+              Save Draft
+            </button>
+            <button
+              onClick={() => handleSubmit("published")}
+              disabled={loading}
+              className="btn-primary"
+            >
+              Publish
+            </button>
           </div>
         </div>
       </main>

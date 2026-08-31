@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "../../lib/supabase-client";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,33 +10,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [debug, setDebug] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setDebug("Starting login...");
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     
-    try {
-      setDebug("Calling supabase.auth.signInWithPassword...");
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        setDebug(`Error: ${error.message}`);
-        setError(error.message);
-      } else {
-        setDebug(`Success! User: ${data.user?.email}`);
-        // Wait a bit for session to be set
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        router.push("/dashboard");
-      }
-    } catch (err: any) {
-      setDebug(`Exception: ${err.message}`);
-      setError(err.message || "An error occurred");
+    if (error) {
+      setError(error.message);
+    } else {
+      router.push("/dashboard");
     }
     setLoading(false);
   };
@@ -48,56 +31,53 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
-          <p className="mt-2 text-muted-foreground">Sign in to your NovelSpace account</p>
+          <p className="mt-2 text-muted-foreground">Sign in to NovelSpace</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
           )}
 
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">Email</label>
-            <Input
+            <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">Password</label>
-            <Input
+            <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          >
             {loading ? "Signing in..." : "Sign in"}
-          </Button>
-
-          {debug && (
-            <div className="rounded-md bg-muted p-3 text-xs font-mono">
-              Debug: {debug}
-            </div>
-          )}
+          </button>
         </form>
 
-        <div className="text-center text-xs text-muted-foreground">
-          <p>Test accounts:</p>
-          <p>admin@novel.space / Admin12345</p>
-          <p>writer@novel.space / Writer12345</p>
-        </div>
+        <p className="text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <a href="/register" className="font-medium text-primary hover:underline">Sign up</a>
+        </p>
       </div>
     </div>
   );
