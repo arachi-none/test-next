@@ -8,17 +8,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
       - run: npm ci
       - run: npm run build
-
       - name: Cache build output
         uses: actions/cache/save@v4
         with:
@@ -35,7 +35,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-
       - name: Restore build output
         uses: actions/cache/restore@v4
         with:
@@ -46,12 +45,10 @@ jobs:
             package.json
             next.config.mjs
           key: next-build-${{ github.run_id }}-${{ github.run_attempt }}
-
-      - name: Deploy to production folder
+      - name: Deploy to production
         run: |
           mkdir -p /home/adminit/webs/cms-prod
           cp -r .next/ node_modules/ package.json next.config.mjs next-env.d.ts /home/adminit/webs/cms-prod/
-
       - name: Restart PM2
         run: |
           cd /home/adminit/webs/cms-prod
