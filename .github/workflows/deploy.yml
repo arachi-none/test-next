@@ -19,8 +19,6 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
-      - name: Show build output
-        run: ls -la .next/static/css/
       - name: Cache build output
         uses: actions/cache/save@v4
         with:
@@ -63,8 +61,19 @@ jobs:
         run: |
           mkdir -p /home/adminit/webs/cms-prod
           cp -r .next/ app/ components/ lib/ public/ node_modules/ package.json next.config.mjs next-env.d.ts tailwind.config.js postcss.config.js /home/adminit/webs/cms-prod/
+      - name: Create env file
+        run: |
+          cat > /home/adminit/webs/cms-prod/.env << 'EOF'
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_JWKS_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}/auth/v1/.well-known/jwks.json
+          NEXT_PUBLIC_SITE_URL=https://novel.itmk.web.id
+          NEXT_PUBLIC_SITE_NAME=NovelSpace
+          EOF
       - name: Restart PM2
         run: |
           cd /home/adminit/webs/cms-prod
-          pm2 restart blog-cms || pm2 start npm --name "blog-cms" -- run start
+          pm2 stop blog-cms 2>/dev/null; pm2 delete blog-cms 2>/dev/null
+          pm2 start npm --name "blog-cms" -- run start
           pm2 save
