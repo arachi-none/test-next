@@ -19,15 +19,23 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
+      - name: Show build output
+        run: ls -la .next/static/css/
       - name: Cache build output
         uses: actions/cache/save@v4
         with:
           path: |
             .next/
             node_modules/
+            app/
+            components/
+            lib/
+            public/
             next-env.d.ts
             package.json
             next.config.mjs
+            tailwind.config.js
+            postcss.config.js
           key: next-build-${{ github.run_id }}-${{ github.run_attempt }}
 
   deploy:
@@ -41,14 +49,20 @@ jobs:
           path: |
             .next/
             node_modules/
+            app/
+            components/
+            lib/
+            public/
             next-env.d.ts
             package.json
             next.config.mjs
+            tailwind.config.js
+            postcss.config.js
           key: next-build-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Deploy to production
         run: |
           mkdir -p /home/adminit/webs/cms-prod
-          cp -r .next/ node_modules/ package.json next.config.mjs next-env.d.ts /home/adminit/webs/cms-prod/
+          cp -r .next/ app/ components/ lib/ public/ node_modules/ package.json next.config.mjs next-env.d.ts tailwind.config.js postcss.config.js /home/adminit/webs/cms-prod/
       - name: Restart PM2
         run: |
           cd /home/adminit/webs/cms-prod
