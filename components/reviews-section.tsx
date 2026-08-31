@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../lib/auth-context";
 import { supabase } from "../lib/supabase-client";
 import { Button } from "../components/ui/button";
